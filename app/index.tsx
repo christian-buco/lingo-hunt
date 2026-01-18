@@ -24,7 +24,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>LangSnap App</Text>
+      <Text style={styles.title}>Lingo Hunt App</Text>
       <Text style={styles.subtitle}>{connectionStatus}</Text>
     </View>
   );
