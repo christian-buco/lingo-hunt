@@ -1,49 +1,13 @@
-import { collection, getDocs } from 'firebase/firestore';
-import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { db } from '../firebase/config';
+import { Redirect } from 'expo-router';
 
 export default function Index() {
-  const [connectionStatus, setConnectionStatus] = useState("Testing...");
+  // For now, always redirect to login
+  // TODO: Check auth status in Epic 2
+  const isLoggedIn = false;
 
-  useEffect(() => {
-    // Test Firestore connection
-    const testConnection = async () => {
-      try {
-        // Try to read from a collection (even if empty)
-        const querySnapshot = await getDocs(collection(db, "test"));
-        setConnectionStatus("Firebase Connected! ✅");
-      } catch (error) {
-        console.error("Firebase error:", error);
-        setConnectionStatus("Firebase Error ❌");
-      }
-    };
+  if (isLoggedIn) {
+    return <Redirect href="/(tabs)" />;
+  }
 
-    testConnection();
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Lingo Hunt App</Text>
-      <Text style={styles.subtitle}>{connectionStatus}</Text>
-    </View>
-  );
+  return <Redirect href="/(auth)/login" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-  },
-});
