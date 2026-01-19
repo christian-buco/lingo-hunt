@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# android emulator
+.idea/
+
 # Expo
 .expo/
 dist/
