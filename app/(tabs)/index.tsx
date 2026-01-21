@@ -1,11 +1,16 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { user } = useAuth();
 
   return (
     <View style={styles.container}>
+      {user && (
+        <Text style={styles.welcomeText}>Welcome back, {user.email}!</Text>
+      )}
       <Text style={styles.title}>Today's Challenge</Text>
       <Text style={styles.word}>café</Text>
       <Text style={styles.translation}>coffee</Text>
@@ -29,6 +34,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     padding: 20,
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#007AFF',
+    marginBottom: 20,
+    fontWeight: '600',
   },
   title: {
     fontSize: 18,
