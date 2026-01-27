@@ -63,11 +63,6 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Log In</Text>
-        </View>
-
         {/* Branding / Welcome Section */}
         <View style={styles.welcomeSection}>
           <View style={styles.logoContainer}>
@@ -226,8 +221,8 @@ const styles = StyleSheet.create({
   },
   welcomeSection: {
     paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 16,
+    paddingTop: 128,
+    paddingBottom: 32,
     backgroundColor: '#fff',
   },
   logoContainer: {
