@@ -1,18 +1,26 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user, signOut } = useAuth();
 
-  const handleLogout = () => {
-    // TODO: Implement logout in Epic 2
-    router.replace('/(auth)/login');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // Navigation will happen automatically via index.tsx redirect
+      router.replace('/(auth)/login');
+    } catch (error) {
+      // If logout fails, still try to navigate to login
+      router.replace('/(auth)/login');
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
-      <Text style={styles.email}>user@example.com</Text>
+      <Text style={styles.email}>{user?.email || 'user@example.com'}</Text>
       <Text style={styles.level}>Level 3</Text>
       
       <TouchableOpacity 
