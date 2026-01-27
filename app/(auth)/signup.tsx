@@ -74,7 +74,7 @@ export default function SignupScreen() {
       
       await setDoc(doc(db, 'users', currentUser.uid), userProfile);
       
-      // Navigation will happen automatically via index.tsx redirect
+      // Redirect to home screen after successful signup and profile creation
       router.replace('/(tabs)');
     } catch (error: any) {
       let errorMessage = 'Failed to create account. Please try again.';
