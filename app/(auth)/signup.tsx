@@ -12,6 +12,8 @@ import {
   Platform
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { db, auth } from '../../firebase/config';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 // Signup Screen
 export default function SignupScreen() {
@@ -20,12 +22,13 @@ export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Handle signup
   const handleSignup = async () => {
-    // If the email, password, or confirm password is not filled in, show an error
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+    // If the email, password, confirm password, or display name is not filled in, show an error
+    if (!email.trim() || !password.trim() || !confirmPassword.trim() || !displayName.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -52,7 +55,27 @@ export default function SignupScreen() {
     try {
       setLoading(true);
       await signUp(email.trim(), password);
+      
+      // Get the current user from Firebase auth
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('User not found after signup');
+      }
+      
+      // Create user profile in Firestore
+      const userProfile = {
+        userId: currentUser.uid,
+        email: currentUser.email,
+        displayName: displayName.trim(),
+        createdAt: serverTimestamp(),
+        activeLanguage: 'Spanish',
+        deviceToken: null
+      };
+      
+      await setDoc(doc(db, 'users', currentUser.uid), userProfile);
+      
       // Navigation will happen automatically via index.tsx redirect
+      router.replace('/(tabs)');
     } catch (error: any) {
       let errorMessage = 'Failed to create account. Please try again.';
       
@@ -85,6 +108,16 @@ export default function SignupScreen() {
         
         {/* Email form */}
         <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Display Name"
+            placeholderTextColor="#999"
+            value={displayName}
+            onChangeText={setDisplayName}
+            autoCapitalize="words"
+            editable={!loading}
+          />
+          
           <TextInput
             style={styles.input}
             placeholder="Email"
