@@ -1,5 +1,7 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CountryFlag from "react-native-country-flag";
+import React from 'react';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -10,16 +12,33 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      <Text style={styles.email}>user@example.com</Text>
-      <Text style={styles.level}>Level 3</Text>
+    <View
+      style={[
+        styles.container,
+        {
+          flexDirection: 'column',
+        }
+      ]}>
+      <View style={{flex: 1, backgroundColor: 'white'}}>
+        <CountryFlag isoCode="us" size={25} />
+
+      </View>
+      <View style={{flex: 2, backgroundColor: '#000500'}} />
+      <View style={{flex: 1, backgroundColor: '#1f501f'}} />
+      <View style={{flex: 1, backgroundColor: '#0faddd'}} />
+      <View style={{flex: 1, backgroundColor: '#0a1924'}} />
+      <View style={{flex: 1, backgroundColor: '#4b1635'}} />
+      <View style={{flex: 1, backgroundColor: '#caa21f'}} />
+      <View style={{flex: 1, backgroundColor: '#ca2a15'}} />
+      
+      <Text>Profile pic</Text>
+      <Text>user@example.com</Text>
+      <Text>Level 3</Text>
       
       <TouchableOpacity 
-        style={styles.button}
         onPress={handleLogout}
       >
-        <Text style={styles.buttonText}>Logout</Text>
+        <Text>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -28,37 +47,11 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
     padding: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  email: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 8,
-  },
-  level: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 40,
-  },
-  button: {
-    backgroundColor: '#FF3B30',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    backgroundColor: 'white',
   },
 });
+
+
+
+
