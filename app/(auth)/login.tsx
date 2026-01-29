@@ -14,10 +14,12 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-// import { signIn } from '../../src/services/authService';
+import { useAuth } from '../../contexts/AuthContext';
 
+// Login Screen
 export default function LoginScreen() {
   const router = useRouter();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,22 +27,42 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     // Validation
-    if (!email || !password) {
+    if (!email.trim() || !password.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    setLoading(true);
+    // If the email does not include an @, show an error
+    if (!email.includes('@')) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
 
-    // const result = await signIn(email, password);
-
-    setLoading(false);
-
-    // if (result.success) {
-    //   // Auth state will handle navigation automatically
-    // } else {
-    //   Alert.alert('Login Failed', result.error);
-    // }
+    // Try to sign in
+    try {
+      setLoading(true);
+      await signIn(email.trim(), password);
+      // Redirect to home page after successful login
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      let errorMessage = 'Failed to sign in. Please try again.';
+      
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = 'This account has been disabled.';
+      } else if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email.';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password.';
+      } else if (error.code === 'auth/invalid-credential') {
+        errorMessage = 'Invalid email or password.';
+      }
+      
+      Alert.alert('Sign In Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -366,20 +388,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
   },
-  footer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    marginTop: 'auto',
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#4B4B4B',
-  },
   footerLink: {
     color: '#8080ff',
     fontWeight: 'bold',
   },
   bottomSpacing: {
     height: 32,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  linkText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });

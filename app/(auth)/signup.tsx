@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+
 import {
   ActivityIndicator,
   Alert,
@@ -15,47 +16,92 @@ import {
   View
 } from 'react-native';
 // import { signUp } from '../../src/services/authService';
+import { useAuth } from '../../contexts/AuthContext';
+import { db, auth } from '../../firebase/config';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
+
+// Signup Screen
 export default function SignupScreen() {
   const router = useRouter();
+  const { signUp } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    // Validation
-    if (!username || !email || !displayName || !password) {
+    // If the email, password, confirm password, or display name is not filled in, show an error
+    if ( !username || !email.trim() || !password.trim() || !confirmPassword.trim() || !displayName.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
+    // If the email does not include an @, show an error
+    if (!email.includes('@')) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    // If the password is less than 6 characters, show an error
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email');
+    // If the passwords do not match, show an error
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
-    setLoading(true);
-    
-    // const result = await signUp(email, password, displayName);
-    
-    setLoading(false);
-    
-    // if (result.success) {
-    //   // Success - auth state will handle navigation
-    //   Alert.alert('Success', 'Welcome to LingoHunt! 🎉');
-    // } else {
-    //   Alert.alert('Signup Failed', result.error);
-    // }
+    // Try to sign up
+    try {
+      setLoading(true);
+      await signUp(email.trim(), password);
+      
+      // Get the current user from Firebase auth
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('User not found after signup');
+      }
+      
+      // Create user profile in Firestore
+      const userProfile = {
+        userId: currentUser.uid,
+        email: currentUser.email,
+        displayName: displayName.trim(),
+        createdAt: serverTimestamp(),
+        activeLanguage: 'Spanish',
+        deviceToken: null
+      };
+      
+      await setDoc(doc(db, 'users', currentUser.uid), userProfile);
+      
+      // Redirect to home screen after successful signup and profile creation
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      let errorMessage = 'Failed to create account. Please try again.';
+      
+      // If credentials are invalid, show an error
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      } else if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'An account with this email already exists.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password is too weak. Please choose a stronger password.';
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = 'Email/password accounts are not enabled.';
+      }
+      
+      Alert.alert('Sign Up Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -157,6 +203,33 @@ export default function SignupScreen() {
               >
                 <Ionicons 
                   name={showPassword ? "eye-off" : "eye"} 
+                  size={24} 
+                  color="#999" 
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Confirm Password Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirm Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="••••••••"
+                placeholderTextColor="#999"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Ionicons 
+                  name={showConfirmPassword ? "eye-off" : "eye"} 
                   size={24} 
                   color="#999" 
                 />
