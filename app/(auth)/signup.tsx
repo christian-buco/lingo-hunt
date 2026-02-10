@@ -17,8 +17,6 @@ import {
 } from 'react-native';
 // import { signUp } from '../../src/services/authService';
 import { useAuth } from '../../contexts/AuthContext';
-import { db, auth } from '../../firebase/config';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 
 // Signup Screen
@@ -58,32 +56,15 @@ export default function SignupScreen() {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
+    
+    setLoading(true);
 
     // Try to sign up
     try {
-      setLoading(true);
-      await signUp(email.trim(), password);
+      await signUp(email.trim(), password, displayName.trim(), username.trim());
       
-      // Get the current user from Firebase auth
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        throw new Error('User not found after signup');
-      }
-      
-      // Create user profile in Firestore
-      const userProfile = {
-        userId: currentUser.uid,
-        email: currentUser.email,
-        displayName: displayName.trim(),
-        createdAt: serverTimestamp(),
-        activeLanguage: 'Spanish',
-        deviceToken: null
-      };
-      
-      await setDoc(doc(db, 'users', currentUser.uid), userProfile);
-      
-      // Redirect to home screen after successful signup and profile creation
-      router.replace('/(tabs)');
+      // Redirect to login screen after successful signup and profile creation
+      router.replace('/(auth)/login');
     } catch (error: any) {
       let errorMessage = 'Failed to create account. Please try again.';
       
